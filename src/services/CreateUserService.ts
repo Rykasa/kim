@@ -1,5 +1,6 @@
 import { connectDB } from "../db/connect";
 import { QueryResult } from 'pg';
+import bcrypt from 'bcryptjs';
 import { createJWT } from "../utils/createJWT";
 
 interface IUser{
@@ -14,6 +15,9 @@ class CreateUserService{
     const insertText = `
       INSERT INTO users(name, password, email) VALUES($1, $2, $3) RETURNING *
     `;
+
+    const salt = await bcrypt.genSalt(10);
+    password = await bcrypt.hash(password, salt);
     
     if(connectDB){
       const user: QueryResult<IUser> = await connectDB.query(insertText, [name, password, email]);
